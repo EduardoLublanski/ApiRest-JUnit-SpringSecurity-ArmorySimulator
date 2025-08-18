@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/armory
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: minha_senha
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jwt:
+    secretKey: LzAooweXAu8TiOG9I1QouYLxEVY5/zQegUVTELX9is2lG1Fsj6DWI80BZWfJTfio
+
