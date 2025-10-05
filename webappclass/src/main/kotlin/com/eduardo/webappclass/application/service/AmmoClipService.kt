@@ -5,6 +5,7 @@ import com.eduardo.webappclass.application.persistence.ProjectileDataManager
 import com.eduardo.webappclass.domain.entity.AmmoClip
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import java.util.Optional
 
 @Service
 class AmmoClipService(
@@ -14,6 +15,8 @@ class AmmoClipService(
 
     fun aquire(ammoClip: AmmoClip) = ammoClipDataManager.register(ammoClip)
     fun getAll() = ammoClipDataManager.getAll()
+
+    fun getById(id: Long): Optional<AmmoClip> = ammoClipDataManager.getById(id)
 
     @Transactional
     fun loadAmmoClipByIdWithProjectileOfId(ammoClipId: Long, projectileId: Long): AmmoClip {
@@ -38,7 +41,7 @@ class AmmoClipService(
     else throw NoSuchElementException("ammo clip $ammoClipId not found")
 
 
-    private fun findAmmoClipByIdOrThrowEx(ammoClipId: Long) = ammoClipDataManager.getById(ammoClipId)
+    private fun findAmmoClipByIdOrThrowEx(ammoClipId: Long): AmmoClip = ammoClipDataManager.getById(ammoClipId)
         .orElseThrow { NoSuchElementException("ammo clip $ammoClipId not found") }
 
 

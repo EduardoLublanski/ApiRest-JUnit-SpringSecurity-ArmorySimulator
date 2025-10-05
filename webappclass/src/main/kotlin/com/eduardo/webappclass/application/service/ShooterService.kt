@@ -13,6 +13,8 @@ class ShooterService(
     private val passwordEncoder: PasswordEncoder
 ) {
     fun register(newShooter: Shooter): Shooter {
+        if(shooterDataManager.existsByCpf(newShooter.cpf)) throw IllegalArgumentException("Shooter ${newShooter.cpf} is already registered")
+
         newShooter.password = passwordEncoder.encode(newShooter.password)
 
         return shooterDataManager.register(newShooter)
@@ -42,7 +44,7 @@ class ShooterService(
         val shooter = getByCpfOrThrowsError(cpf)
 
         if(shooter.roles.contains(role)) shooter.roles.remove(role)
-        else throw IllegalArgumentException("shooter $cpf hasn't the role $role")
+        else throw IllegalArgumentException("shooter $cpf already hasn't the role $role")
 
         return shooter
     }

@@ -2,19 +2,20 @@ package com.eduardo.webappclass.adapter.controller.dto.mapper
 
 import com.eduardo.webappclass.adapter.controller.dto.ProjectileDto
 import com.eduardo.webappclass.application.persistence.AmmoClipDataManager
+import com.eduardo.webappclass.application.service.AmmoClipService
 import com.eduardo.webappclass.domain.entity.Projectile
 import org.springframework.stereotype.Component
 
 @Component
 class ProjectileMapper(
-    val ammoClipDataManager: AmmoClipDataManager
+    val ammoClipService: AmmoClipService
 ) {
 
         fun toProjectile(projectileDto: ProjectileDto): Projectile {
 
             val projectile = Projectile(caliber = projectileDto.caliber, type = projectileDto.type).apply {
 
-                ammoClip = ammoClipDataManager.getById(projectileDto.ammoClipId ?: -1).orElse(null)
+                ammoClip = ammoClipService.getById(projectileDto.ammoClipId ?: -1).orElse(null)
 
             }
             return projectile

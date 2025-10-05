@@ -40,7 +40,7 @@ class ShooterServiceTest {
  }
 
 @Test
- fun registerTest() {
+fun shouldReturnPasswordEncodedAndShooterRegistered_whenRegisterWithValidShooter() {
 
   val shooterToBeRegistered = testShooter
 
@@ -56,7 +56,7 @@ class ShooterServiceTest {
  }
 
 @Test
- fun getAllTest() {
+ fun shouldReturnAllShooters_whenGetAll() {
   whenever(shooterDataManager.getAll()).thenReturn(listOf(testShooter))
 
   val shooterList = shooterService.getAll()
@@ -65,7 +65,7 @@ class ShooterServiceTest {
  }
 
 @Test
- fun getByCpfTest_existingCpf() {
+ fun shouldReturnShooter_whenGetByCpfWithValidCpf() {
   whenever(shooterDataManager.getByCpf(testShooter.cpf))
    .thenReturn(Optional.of(testShooter))
 
@@ -74,7 +74,7 @@ class ShooterServiceTest {
  assertEquals(testShooter.cpf, shooterResult.cpf)
  }
  @Test
- fun getByCpfTest_nonExistingCpf() {
+ fun shouldThrowIllegalArgumentException_whenGetByCpfWithInvalidCpf() {
   whenever(shooterDataManager.getByCpf("fake cpf"))
    .thenReturn(Optional.empty())
 
@@ -87,7 +87,7 @@ class ShooterServiceTest {
  }
 
 @Test
- fun banShooterByCpfTest_existingCpf() {
+ fun shouldBanShooter_whenBanByCpfWithValidCpf() {
   val shooterCpf = testShooter.cpf
 
    whenever(shooterDataManager.existsByCpf(shooterCpf))
@@ -98,7 +98,7 @@ class ShooterServiceTest {
   verify(shooterDataManager).banByCpf(shooterCpf)
  }
  @Test
- fun banShooterByCpfTest_nonExistingCpf() {
+ fun shouldThrowNoSuchElementException_whenBanByCpfWithInvalidCpf() {
   val nonExistentShooterCpf = testShooter.cpf
 
   whenever(shooterDataManager.existsByCpf(nonExistentShooterCpf))
@@ -115,7 +115,7 @@ class ShooterServiceTest {
  }
 
 @Test
- fun addRoleToShooterByCpfTest_sucessUpdate() {
+ fun shouldAddNewRole_whenAddRoleToShooterByCpfWithValidRoleAndValidCpf() {
   val shooterToUpdate = testShooter
   val newRole = Role.ROLE_USER
 
@@ -127,7 +127,7 @@ class ShooterServiceTest {
  assertTrue(serviceResult.roles.contains(newRole))
 }
  @Test
- fun addRoleToShooterByCpfTest_nonExistingCpf() {
+ fun shouldThrowIllegalArgumentException_whenAddRoleToShooterByCpfWithInvalidCpf() {
   val nonExistentShooterCpf = testShooter.cpf
   val newRole = Role.ROLE_USER
 
@@ -144,7 +144,7 @@ class ShooterServiceTest {
   )
  }
  @Test
- fun addRoleToShooterByCpfTest_alreadyExistingRole(){
+ fun shouldThrowIllegalArgumentException_whenAddRoleToShooterByCpfWithDuplicatedRole(){
   val newRole = Role.ROLE_USER
   val shooterToUpdate = testShooter.apply {roles.add(newRole)}
 
@@ -163,7 +163,7 @@ class ShooterServiceTest {
  }
 
 @Test
- fun removeRoleFromShooterByCpfTest_sucessUpdate() {
+ fun shouldRemoveRole_whenRemoveRoleFromShooterByCpfWithValidCpfAndValidRole() {
    val roleToRemove = Role.ROLE_USER
    val shooterWithRole = testShooter.apply {roles.add(roleToRemove)}
 
@@ -175,7 +175,23 @@ class ShooterServiceTest {
    assertFalse(shooterWithRoleRemoved.roles.contains(roleToRemove))
  }
  @Test
- fun removeRoleFromShooterByCpfTest_roleAlreadyMissing() {
+ fun shouldThrowIllegalArgumentException_whenRemoveRoleFromShooterByCpfWithInvalidCpf(){
+  val roleToRemove = Role.ROLE_USER
+  val shooterWithRole = testShooter
+
+  whenever(shooterDataManager.getByCpf(any())).thenReturn(Optional.empty())
+
+  val serviceResult = assertThrows(IllegalArgumentException::class.java) { shooterService.removeRoleFromShooterByCpf(shooterWithRole.cpf, roleToRemove) }
+
+  assertTrue(
+   serviceResult.message == "shooter ${shooterWithRole.cpf} not found",
+   "incompatible error message\n" +
+           "expected: shooter ${shooterWithRole.cpf} not found\n" +
+           "found: ${serviceResult.message}"
+  )
+ }
+ @Test
+ fun shouldThrowIllegalArgumentException_whenRemoveRoleFromShooterByCpfWithAlreadyMissingRole() {
   val roleToRemove = Role.ROLE_USER
   val shooterWithoutRole = testShooter
 
@@ -185,9 +201,9 @@ class ShooterServiceTest {
   val serviceResult = assertThrows(IllegalArgumentException::class.java) { shooterService.removeRoleFromShooterByCpf(shooterWithoutRole.cpf, roleToRemove) }
 
   assertTrue(
-   serviceResult.message == "shooter ${shooterWithoutRole.cpf} hasn't the role $roleToRemove",
+   serviceResult.message == "shooter ${shooterWithoutRole.cpf} already hasn't the role $roleToRemove",
    "incompatible error message\n" +
-           "shooter ${shooterWithoutRole.cpf} hasn't the role $roleToRemove\n" +
+           "shooter ${shooterWithoutRole.cpf} already hasn't the role $roleToRemove\n" +
            "found: ${serviceResult.message}"
   )
  }

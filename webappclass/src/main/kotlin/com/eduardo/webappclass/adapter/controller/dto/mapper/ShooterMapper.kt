@@ -14,7 +14,7 @@ class ShooterMapper() {
             name = shooterDto.name,
             email = shooterDto.email,
             password = shooterDto.password
-        )
+        ). apply { roles = shooterDto.roles.toMutableList() }
 
         return armoryUser
     }

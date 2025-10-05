@@ -33,7 +33,7 @@ class Shooter() {
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    val roles: MutableList<Role> = mutableListOf(Role.ROLE_GUEST)
+    var roles: MutableList<Role> = mutableListOf(Role.ROLE_GUEST)
 
     constructor(cpf: String, name: String, email: String, password: String): this() {
         this.cpf = cpf

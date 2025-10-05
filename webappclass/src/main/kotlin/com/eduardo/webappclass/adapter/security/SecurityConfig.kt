@@ -1,5 +1,7 @@
 package com.eduardo.webappclass.adapter.security
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -14,7 +16,10 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
-class SecurityConfig(private val jwtFilter: JwtFilter) {
+class SecurityConfig(
+    private val jwtFilter: JwtFilter,
+    private val jwtLoginFilter: JwtLoginFilter,
+) {
 
     @Bean
     fun securityFilter(http: HttpSecurity): SecurityFilterChain {
@@ -29,11 +34,12 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
             .logout { it.disable() }
             .csrf { it.disable() }
             .headers { it.frameOptions { it.disable() } }
-            .anonymous { it.disable() }
 
             .authorizeHttpRequests {
                 it.requestMatchers(
                     HttpMethod.DELETE,"$shooterUrl/{cpf}").hasRole("ADM")
+                it.requestMatchers(
+                    HttpMethod.POST,shooterUrl).hasRole("ADM")
                 it.requestMatchers(
                     "$shooterUrl/{cpf}/add-role",
                     "$shooterUrl/{cpf}/remove-role",
@@ -64,11 +70,25 @@ class SecurityConfig(private val jwtFilter: JwtFilter) {
 
 
                 it.requestMatchers(HttpMethod.GET, projectileUrl, ammoClipUrl, pistolUrl).hasAnyRole("USER", "ADM", "GUEST")
-                it.requestMatchers("/h2-console/**","$baseUrl/auth").permitAll()
+                it.requestMatchers("/h2-console/**").permitAll()
                 it.anyRequest().authenticated()
             }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .addFilterAt(jwtLoginFilter, UsernamePasswordAuthenticationFilter::class.java)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter::class.java)
+
+            .exceptionHandling {
+                it.accessDeniedHandler { _, response, _ ->
+                    response.status = HttpServletResponse.SC_FORBIDDEN
+                    response.contentType = "application/json"
+                    response.writer.write("""{"error":"Insufficient authorities"}""")
+                }
+                it.authenticationEntryPoint { request, response, authException ->
+                    response.status = HttpServletResponse.SC_UNAUTHORIZED
+                    response.contentType = "application/json"
+                    response.writer.write("""{"error":"Bad credentials"}""")
+                }
+            }
 
         return http.build()
     }

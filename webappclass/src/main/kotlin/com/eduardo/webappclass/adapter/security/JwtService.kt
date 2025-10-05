@@ -23,7 +23,7 @@ class JwtService(
             .subject(userdetails.username)
             .claim("roles", roles)
             .issuedAt(Date(now))
-            .expiration(Date(now + 1000 * 60 * 60))
+            .expiration(Date(now + 1000 * 60 * 60 * 10))
             .signWith(Keys.hmacShaKeyFor(secretKey.toByteArray()))
             .compact()
     }
@@ -36,12 +36,7 @@ class JwtService(
             .parseSignedClaims(token)
             .payload
     }
-    public fun isTokenValid(token: String, userDetails: UserDetails): Boolean {
-        return getExpirationDate(token).after(Date(System.currentTimeMillis())) && getSubject(token) == userDetails.username
-    }
     public fun getSubject(token: String) = extractClaims(token).subject
-    private fun getExpirationDate(token: String) = extractClaims(token).expiration
-    private fun getIssuedDate(token: String) = extractClaims(token).issuedAt
 
     public fun getRoles(token: String): List<String> {
         val roleClaims = extractClaims(token)["roles"]

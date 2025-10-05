@@ -11,4 +11,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  jwt:
+    secretKey: LzAooweXAu8TiOG9I1QouYLxEVY5/zQegUVTELX9is2lG1Fsj6DWI80BZWfJTfio
 
